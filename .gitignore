@@ -1,0 +1,17 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# database
+*.db
+
+# Distribution / packaging
+.Python
+.idea/
+venv/
+
+# log files
+*.log
+test/.cache/
+test/.pytest_cache/
+.cache/
