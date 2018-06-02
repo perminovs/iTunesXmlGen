@@ -1,15 +1,40 @@
+from datetime import datetime
 from lxml import etree as et
-from random import sample
-from .utils import Sequence, tostring, strand, intrand
+from random import sample, choice
+from .utils import Sequence, strand, intrand, validate_less
 
 
-__track_id = Sequence()
-__playlist_id = Sequence()
+__track_id = None
+__playlist_id = None
 
 
-def root_xml():  # TODO must be parametrized
+def generate_xml(
+    tracks_cnt=10, artists_cnt=5, playlists_cnt=3, playlist_fill_rate=5,
+    playlist_fill_variety=0,
+):
     """ Returns full iTunes xml
+
+    :param tracks_cnt: count of xml Tracks
+    :param artists_cnt: count of Artists, generated for Tracks
+    :param playlists_cnt: count of Playlist
+    :param playlist_fill_rate: count of Tracks in one Playlist
+    :param playlist_fill_variety: variety of `playlist_fill_rate` param
+
+    Count of playlist tracks will be:
+    `playlist_fill_rate` +/- `playlist_fill_variety`
     """
+    validate_less(
+        small=playlists_cnt, big=tracks_cnt,
+        small_name='Count of Playlists', big_name='Count of Tracks'
+    )
+    validate_less(
+        small=playlist_fill_variety, big=playlist_fill_rate,
+        small_name='Variety of Playlist filling', big_name='Count of Playlists'
+    )
+
+    global __track_id, __playlist_id
+    __track_id, __playlist_id = Sequence(), Sequence()
+
     root = et.Element('plist', attrib={'version': "1.0"})
     data = et.Element('dict')
 
@@ -18,15 +43,21 @@ def root_xml():  # TODO must be parametrized
     _add_param('Major Version', 1, type_='integer')
     _add_param('Minor Version', 1, type_='integer')
     _add_param('Application Version', '12.7.3.46')
-    _add_param('Date', '2018-04-21T15:04:31Z', type_='date')  # TODO format now
+    now = datetime.now().strftime('%y-%m-%dT%H:%M:%SZ')
+    _add_param('Date', now, type_='date')
     _add_param('Features', 5, type_='integer')
     _add_param('Library Persistent ID', strand(10))
 
-    track_key_node, track_container = xml_tracks(cnt=6)  # TODO magic nums
+    track_key_node, track_container = xml_tracks(
+        tracks_cnt=tracks_cnt, artists_cnt=artists_cnt)
+
     data.append(track_key_node)
     data.append(track_container)
 
-    plst_key_node, playlist_container = xml_playlists(cnt=2)
+    plst_key_node, playlist_container = xml_playlists(
+        cnt=playlists_cnt, fill_rate=playlist_fill_rate,
+        fill_variety=playlist_fill_variety
+    )
     data.append(plst_key_node)
     data.append(playlist_container)
 
@@ -35,37 +66,32 @@ def root_xml():  # TODO must be parametrized
     return root
 
 
-def xml_tracks(cnt):
+def xml_tracks(tracks_cnt, artists_cnt):
     """  Returns <cnt> pair of tags (track id, track), represents iTunes tracks
     """
     key_node = compile_node(text='Tracks')
+
+    artist_pool = ['artist_{}'.format(strand(5)) for _ in range(artists_cnt)]
+
     track_container = et.Element('dict')
-    for _ in range(cnt):  # TODO using artists and albums pool
-        id_node, track_node = xml_track(  # TODO add params prefix
-            {'title': strand(7), 'artist': strand(5), 'album': strand(6)}
+    for _ in range(tracks_cnt):
+        id_node, track_node = xml_track(
+            title='track_'.format(strand(7)),
+            artist=choice(artist_pool),
+            album='album_'.format(strand(7)),
         )
         track_container.append(id_node)
         track_container.append(track_node)
     return key_node, track_container
 
 
-def xml_track(track_dict, check_not_none=True):  # TODO support more attributes
+def xml_track(**kwargs):  # TODO support more attributes
     """ Returns two tags, represents iTunes track id and track
 
-    :param track_dict: {
-        'title': <title>,
-        'artist': <artist>,
-        'album': <album>,  # nullable
-    }
-    :param check_not_none: checking <title> and <artist> dict keys cannot be None
+    Supported kwargs: title, artist, album
 
     :return tuple(<id_node>, <track_node>)
     """
-    if check_not_none:
-        for key in ('title', 'artist'):
-            if key not in track_dict:
-                raise ValueError('"{}" cannot be None'.format(key))
-
     track_id = __track_id.next
     id_node = compile_node(text=track_id)
 
@@ -74,20 +100,27 @@ def xml_track(track_dict, check_not_none=True):  # TODO support more attributes
     _add_param = param_add_factory(parent_node=track_node)
 
     _add_param(key='Track ID', value=track_id, type_='integer')
-    _add_param(key='Name', value=track_dict.get('title', None))
-    _add_param(key='Artist', value=track_dict.get('artist', None))
-    _add_param(key='Album', value=track_dict.get('album', None))
+    _add_param(key='Name', value=kwargs.get('title', None))
+    _add_param(key='Artist', value=kwargs.get('artist', None))
+    _add_param(key='Album', value=kwargs.get('album', None))
 
     return id_node, track_node
 
 
-def xml_playlists(cnt):
+def xml_playlists(cnt, fill_rate, fill_variety):
     """ Retunrs <cnt> pairs of tags (playlist id, playlist), represents iTunes playlist
     """
     key_node = compile_node(text='Playlists')
     playlist_container = et.Element('array')
-    for _ in range(cnt):  # TODO add name prefix
-        playlist = xml_playlist(name=strand(10), track_cnt=intrand(2, 4))
+    for _ in range(cnt):
+        track_cnt = intrand(
+            minimum=fill_rate - fill_variety,
+            maximum=fill_rate + fill_variety
+        )
+        playlist = xml_playlist(
+            name='playlist_{}'.format(strand(10)),
+            track_cnt=track_cnt,
+        )
         playlist_container.append(playlist)
     return key_node, playlist_container
 
@@ -185,9 +218,3 @@ def compile_node(text, key='key'):
     key_node = et.Element(key)
     key_node.text = str(text)
     return key_node
-
-
-if __name__ == '__main__':  # TODO move to test module
-    xml = root_xml()
-    string = tostring(xml)
-    print(string)

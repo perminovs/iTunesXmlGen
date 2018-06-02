@@ -45,3 +45,27 @@ def tostring(node, decode=True, encoding='UTF-8'):
         pretty_print=True
     )
     return _bytes if not decode else _bytes.decode(encoding)
+
+
+def validate_less(small, big, small_name, big_name):
+    """ Check that `big` is not less than `small`, raise ValueError otherwise
+
+    :param small: smallest value to check
+    :param big: bigger value to check
+    :param small_name: smallest param name for format error
+    :param big_name: bigger param name for format error
+
+    :raise ValueError
+    """
+    err = __validate_less(small, big, small_name, big_name)
+    if err:
+        raise ValueError(err)
+
+
+def __validate_less(small, big, small_name, big_name):
+    if small > big:
+        return (
+            '{small_name} ({small}) must be less than {big_name} ({big})'
+        ).format(
+            small=small, small_name=small_name, big=big, big_name=big_name
+        )
