@@ -4,13 +4,13 @@ import uuid
 
 
 def strand(length=None):
-    """ Returns random string with len = <length>
+    """ Returns random string with len = `length`
     """
     return uuid.uuid4().hex[:length]
 
 
 def intrand(minimum=0, maximum=1000000):
-    """ Returns random int between <minimum> and <maximum> (0 - 1000000 by default)
+    """ Returns random int between `minimum` and `maximum` (0 - 1000000 by default)
     """
     return randint(a=minimum, b=maximum)
 

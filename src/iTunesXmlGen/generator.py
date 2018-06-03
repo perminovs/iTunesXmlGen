@@ -24,8 +24,8 @@ def generate_xml(
     `playlist_fill_rate` +/- `playlist_fill_variety`
     """
     validate_less(
-        small=playlists_cnt, big=tracks_cnt,
-        small_name='Count of Playlists', big_name='Count of Tracks'
+        small=playlist_fill_rate, big=tracks_cnt,
+        small_name='Count of Tracks in Playlist', big_name='Count of Tracks'
     )
     validate_less(
         small=playlist_fill_variety, big=playlist_fill_rate,
@@ -43,7 +43,7 @@ def generate_xml(
     _add_param('Major Version', 1, type_='integer')
     _add_param('Minor Version', 1, type_='integer')
     _add_param('Application Version', '12.7.3.46')
-    now = datetime.now().strftime('%y-%m-%dT%H:%M:%SZ')
+    now = datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
     _add_param('Date', now, type_='date')
     _add_param('Features', 5, type_='integer')
     _add_param('Library Persistent ID', strand(10))
@@ -67,7 +67,7 @@ def generate_xml(
 
 
 def xml_tracks(tracks_cnt, artists_cnt):
-    """  Returns <cnt> pair of tags (track id, track), represents iTunes tracks
+    """  Returns `cnt` pair of tags (<track_id>, <track>), represents iTunes tracks
     """
     key_node = compile_node(text='Tracks')
 
@@ -88,7 +88,7 @@ def xml_tracks(tracks_cnt, artists_cnt):
 def xml_track(**kwargs):  # TODO support more attributes
     """ Returns two tags, represents iTunes track id and track
 
-    Supported kwargs: title, artist, album
+    Supported kwargs: `title`, `artist`, `album`
 
     :return tuple(<id_node>, <track_node>)
     """
@@ -108,7 +108,7 @@ def xml_track(**kwargs):  # TODO support more attributes
 
 
 def xml_playlists(cnt, fill_rate, fill_variety):
-    """ Retunrs <cnt> pairs of tags (playlist id, playlist), represents iTunes playlist
+    """ Retunrs `cnt` pairs of tags (<playlist_id>, <playlist>), represents iTunes playlist
     """
     key_node = compile_node(text='Playlists')
     playlist_container = et.Element('array')
@@ -143,7 +143,7 @@ def xml_playlist(name, track_cnt):
 
     items_key = compile_node(text='Playlist Items')
 
-    available_ids = sample(range(__track_id.current), track_cnt)
+    available_ids = sample(range(1, __track_id.current + 1), track_cnt)
     items_array = et.Element('array')
     for track_id in available_ids:
         item_node = et.Element('dict')
