@@ -38,19 +38,10 @@ def generate_xml(
     root = et.Element('plist', attrib={'version': "1.0"})
     data = et.Element('dict')
 
-    _add_param = param_add_factory(parent_node=data)
-
-    _add_param('Major Version', 1, type_='integer')
-    _add_param('Minor Version', 1, type_='integer')
-    _add_param('Application Version', '12.7.3.46')
-    now = datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
-    _add_param('Date', now, type_='date')
-    _add_param('Features', 5, type_='integer')
-    _add_param('Library Persistent ID', strand(10))
+    fill_xml_head(parent_node=data)
 
     track_key_node, track_container = xml_tracks(
         tracks_cnt=tracks_cnt, artists_cnt=artists_cnt)
-
     data.append(track_key_node)
     data.append(track_container)
 
@@ -64,6 +55,19 @@ def generate_xml(
     root.append(data)
 
     return root
+
+
+def fill_xml_head(parent_node):
+    """ Fill general xml attributes
+    """
+    _add_param = param_add_factory(parent_node=parent_node)
+    _add_param('Major Version', 1, type_='integer')
+    _add_param('Minor Version', 1, type_='integer')
+    _add_param('Application Version', '12.7.3.46')
+    now = datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
+    _add_param('Date', now, type_='date')
+    _add_param('Features', 5, type_='integer')
+    _add_param('Library Persistent ID', strand(10))
 
 
 def xml_tracks(tracks_cnt, artists_cnt):
