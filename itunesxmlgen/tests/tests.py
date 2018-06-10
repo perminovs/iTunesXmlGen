@@ -1,8 +1,8 @@
 import os
 import unittest
 import tempfile
-from iTunesXmlGen import generate_xml
-from iTunesXmlGen.utils import tostring, strand, intrand
+from itunesxmlgen import generate_xml
+from itunesxmlgen.utils import tostring, strand, intrand
 from libpytunes import Library
 
 

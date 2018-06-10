@@ -50,7 +50,7 @@ def tostring(node, decode=True, encoding='UTF-8'):
 def validate_less(small, big, small_name, big_name):
     """ Check that `big` is not less than `small`, raise ValueError otherwise
 
-    :param small: smallest value to check
+    :param small: smaller value to check
     :param big: bigger value to check
     :param small_name: smallest param name for format error
     :param big_name: bigger param name for format error
