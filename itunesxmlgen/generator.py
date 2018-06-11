@@ -78,10 +78,15 @@ def xml_tracks(tracks_cnt, artists_cnt):
     artist_pool = ['artist_{}'.format(strand(5)) for _ in range(artists_cnt)]
 
     track_container = et.Element('dict')
-    for _ in range(tracks_cnt):
+    for track_idx in range(tracks_cnt):
+        artist_idx = track_idx
+        while artist_idx >= len(artist_pool):
+            artist_idx -= len(artist_pool)
+        artist = artist_pool[artist_idx]
+
         id_node, track_node = xml_track(
             title='track_'.format(strand(7)),
-            artist=choice(artist_pool),
+            artist=artist,
             album='album_'.format(strand(7)),
         )
         track_container.append(id_node)

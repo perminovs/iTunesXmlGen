@@ -1,4 +1,5 @@
 import os
+from collections import defaultdict
 import unittest
 import tempfile
 from itunesxmlgen import generate_xml
@@ -136,3 +137,41 @@ class XmlTest(unittest.TestCase):
             )
         )
         self.assertEqual(exc.exception.args[0], err_msg)
+
+    def test__artist_cnt_equal(self):
+        """ Test count of Artists in generated xml equals to `artist_cnt` param
+        """
+        cnt = intrand(100, 150)
+        tracks_cnt, artists_cnt = cnt, cnt
+        lib = self.__generate(tracks_cnt=tracks_cnt, artists_cnt=artists_cnt)
+
+        artists = {track.artist for track in lib.songs.values()}
+        self.assertEqual(len(artists), artists_cnt)
+
+    def test__artist_cnt_distribution_smoothly(self):
+        """ Test Artist to Track bind.
+
+        `artist_cnt` = 2, `track_cnt` = 100 -> each Artists should have 50 tracks
+        """
+        tracks_cnt, artists_cnt = 100, 2
+        lib = self.__generate(tracks_cnt=tracks_cnt, artists_cnt=artists_cnt)
+
+        artists = defaultdict(int)
+        for track in lib.songs.values():
+            artists[track.artist] += 1
+        self.assertEqual(tuple(artists.values()), (50, 50))
+
+    def test__artist_cnt_distribution_not_smoothly(self):
+        """ Test Artist to Track bind.
+
+        `artist_cnt` = 60, `track_cnt` = 90 -> Artists distribution should be:
+        60 artists: have 2 tracks
+        30 artists: have 1 track
+        """
+        tracks_cnt, artists_cnt = 90, 60
+        lib = self.__generate(tracks_cnt=tracks_cnt, artists_cnt=artists_cnt)
+
+        artists = defaultdict(int)
+        for track in lib.songs.values():
+            artists[track.artist] += 1
+        self.assertEqual(set(artists.values()), {1, 2})
