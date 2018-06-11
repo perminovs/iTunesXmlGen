@@ -36,7 +36,7 @@ cd ./iTunesXmlGen
 virtualenv venv --python=/usr/bin/python3
 source ./venv/bin/activate
 ```
-### Install requirement
+### Install requirements
 ```
 pip install -r requirements.txt
 ```
