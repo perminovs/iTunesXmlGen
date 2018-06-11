@@ -6,7 +6,7 @@ with open(path.join(path.dirname(__file__), "README.md"), mode='r') as r:
 
 setup(
     name="itunesxmlgen",
-    version="0.1.1",
+    version="0.1.2",
     author="Perminov Sergey",
     url="https://github.com/perminovs/iTunesXmlGen",
     description="iTunes xml generator",

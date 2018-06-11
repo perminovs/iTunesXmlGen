@@ -69,3 +69,24 @@ def __validate_less(small, big, small_name, big_name):
         ).format(
             small=small, small_name=small_name, big=big, big_name=big_name
         )
+
+
+def validate_positive(value, value_name, strict=True):
+    """ Check that `value` is positive
+
+    :param value: value to check
+    :param value_name: value param name for format error
+    :param strict: is zero value not correct?
+
+    :raise ValueError
+    """
+    err = __validate_positive(value, value_name, strict)
+    if err:
+        raise ValueError(err)
+
+
+def __validate_positive(value, value_name, strict=True):
+    if value < 0 or (value == 0 and strict):
+        return '{value_name} ({value}) must be positive'.format(
+            value_name=value_name, value=value
+        )

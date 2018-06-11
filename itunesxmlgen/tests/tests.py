@@ -39,7 +39,7 @@ class XmlTest(unittest.TestCase):
         """ Test xml will be generate with given params
         """
         tracks_cnt = intrand(100, 200)
-        artists_cnt = intrand(100, 200)
+        artists_cnt = intrand(100, tracks_cnt)
         playlists_cnt = intrand(10, 20)
         playlist_fill_rate = intrand(5, 50)
         playlist_fill_variety = 0
@@ -69,7 +69,7 @@ class XmlTest(unittest.TestCase):
         """ Test `playlist_fill_variety` param
         """
         tracks_cnt = intrand(100, 200)
-        artists_cnt = intrand(100, 200)
+        artists_cnt = intrand(100, tracks_cnt)
         playlists_cnt = intrand(10, 20)
         playlist_fill_rate = intrand(10, 50)
         playlist_fill_variety = intrand(1, 9)
@@ -89,6 +89,26 @@ class XmlTest(unittest.TestCase):
                 second=playlist_fill_rate,
                 delta=playlist_fill_variety,
             )
+
+    def test_no_playlist(self):
+        """ Test xml with no playlists generate
+        """
+        lib = self.__generate(playlists_cnt=0)
+        self.assertEqual(lib.getPlaylistNames(), [])
+        self.assertNotEquals(lib.songs, {})
+
+    def test__invalid_params__negative_tracks_cnt(self):
+        """ Test `generate_xml` raise when invalid params are given:
+
+        tracks_cnt < 0
+        """
+        tracks_cnt = intrand(-20, -10)
+        with self.assertRaises(expected_exception=ValueError) as exc:
+            self.__generate(tracks_cnt=tracks_cnt)
+
+        err_msg = 'Count of Tracks ({value}) must be positive'.format(
+            value=tracks_cnt)
+        self.assertEqual(exc.exception.args[0], err_msg)
 
     def test_invalid_params__playlist_tracks(self):
         """ Test `generate_xml` raise when invalid params are given:
@@ -134,6 +154,29 @@ class XmlTest(unittest.TestCase):
                 small=playlist_fill_variety, big=playlist_fill_rate,
                 small_name='Variety of Playlist filling',
                 big_name='Count of Playlists',
+            )
+        )
+        self.assertEqual(exc.exception.args[0], err_msg)
+
+    def test_invalid_params__artists_tracks(self):
+        """ Test `generate_xml` raise when invalid params are given:
+
+        artists_cnt > tracks_cnt
+        """
+        tracks_cnt = intrand(5, 10)
+        artists_cnt = intrand(100, 200)
+        with self.assertRaises(expected_exception=ValueError) as exc:
+            self.__generate(
+                tracks_cnt=tracks_cnt,
+                artists_cnt=artists_cnt,
+            )
+
+        err_msg = (
+            '{small_name} ({small}) must be less than '
+            '{big_name} ({big})'.format(
+                small=artists_cnt, big=tracks_cnt,
+                small_name='Count of Artists',
+                big_name='Count of Tracks',
             )
         )
         self.assertEqual(exc.exception.args[0], err_msg)

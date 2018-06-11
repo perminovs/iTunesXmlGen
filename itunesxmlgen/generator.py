@@ -1,7 +1,7 @@
 from datetime import datetime
 from lxml import etree as et
-from random import sample, choice
-from .utils import Sequence, strand, intrand, validate_less
+from random import sample
+from .utils import Sequence, strand, intrand, validate_less, validate_positive
 
 
 __track_id = None
@@ -23,6 +23,25 @@ def generate_xml(
     Count of playlist tracks will be:
     `playlist_fill_rate` +/- `playlist_fill_variety`
     """
+    validate_positive(value=tracks_cnt, value_name='Count of Tracks')
+    validate_positive(value=artists_cnt, value_name='Count of Artists')
+    validate_positive(
+        value=playlists_cnt, value_name='Count of Playlists', strict=False
+    )
+    if playlists_cnt:
+        validate_positive(
+            value=playlist_fill_rate, value_name='Count of Tracks in Playlist'
+        )
+        validate_positive(
+            value=playlist_fill_variety,
+            value_name='Variety of Playlist filling',
+            strict=False
+        )
+
+    validate_less(
+        small=artists_cnt, big=tracks_cnt,
+        small_name='Count of Artists', big_name='Count of Tracks'
+    )
     validate_less(
         small=playlist_fill_rate, big=tracks_cnt,
         small_name='Count of Tracks in Playlist', big_name='Count of Tracks'
@@ -75,7 +94,7 @@ def xml_tracks(tracks_cnt, artists_cnt):
     """
     key_node = compile_node(text='Tracks')
 
-    artist_pool = ['artist_{}'.format(strand(5)) for _ in range(artists_cnt)]
+    artist_pool = ['artist_{}'.format(strand(20)) for _ in range(artists_cnt)]
 
     track_container = et.Element('dict')
     for track_idx in range(tracks_cnt):
@@ -85,9 +104,9 @@ def xml_tracks(tracks_cnt, artists_cnt):
         artist = artist_pool[artist_idx]
 
         id_node, track_node = xml_track(
-            title='track_'.format(strand(7)),
+            title='track_'.format(strand(20)),
             artist=artist,
-            album='album_'.format(strand(7)),
+            album='album_'.format(strand(20)),
         )
         track_container.append(id_node)
         track_container.append(track_node)
@@ -127,7 +146,7 @@ def xml_playlists(cnt, fill_rate, fill_variety):
             maximum=fill_rate + fill_variety
         )
         playlist = xml_playlist(
-            name='playlist_{}'.format(strand(10)),
+            name='playlist_{}'.format(strand(20)),
             track_cnt=track_cnt,
         )
         playlist_container.append(playlist)
