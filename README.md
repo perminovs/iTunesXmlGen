@@ -28,7 +28,7 @@ For more information see docstring.
 ## Run locally
 ### Clone repo
 ```
-git clone git@github.com:perminovs/iTunesXmlGen.git
+git clone https://github.com/perminovs/iTunesXmlGen.git
 cd ./iTunesXmlGen
 ```
 ### Create & activate virtualenv (recommended)
