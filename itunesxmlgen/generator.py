@@ -1,4 +1,5 @@
 from datetime import datetime
+from itertools import cycle
 from lxml import etree as et
 from random import sample
 from .utils import Sequence, strand, intrand, validate_less, validate_positive
@@ -94,15 +95,11 @@ def xml_tracks(tracks_cnt, artists_cnt):
     """
     key_node = compile_node(text='Tracks')
 
-    artist_pool = ['artist_{}'.format(strand(20)) for _ in range(artists_cnt)]
+    artist_gen = ('artist_{}'.format(strand(20)) for _ in range(artists_cnt))
 
     track_container = et.Element('dict')
-    for track_idx in range(tracks_cnt):
-        artist_idx = track_idx
-        while artist_idx >= len(artist_pool):
-            artist_idx -= len(artist_pool)
-        artist = artist_pool[artist_idx]
 
+    for track_idx, artist in zip(range(tracks_cnt), cycle(artist_gen)):
         id_node, track_node = xml_track(
             title='track_'.format(strand(20)),
             artist=artist,

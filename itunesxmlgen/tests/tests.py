@@ -95,7 +95,7 @@ class XmlTest(unittest.TestCase):
         """
         lib = self.__generate(playlists_cnt=0)
         self.assertEqual(lib.getPlaylistNames(), [])
-        self.assertNotEquals(lib.songs, {})
+        self.assertNotEqual(lib.songs, {})
 
     def test__invalid_params__negative_tracks_cnt(self):
         """ Test `generate_xml` raise when invalid params are given:
