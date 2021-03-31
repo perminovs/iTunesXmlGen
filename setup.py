@@ -18,6 +18,6 @@ setup(
     ],
     packages=find_packages(),
     install_requires=[
-        "lxml==4.2.1",
+        "lxml==4.6.3",
     ],
 )
